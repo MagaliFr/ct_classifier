@@ -77,7 +77,7 @@ class CTDataset(Dataset):
         image_name, label = self.data[idx]              # see line 57 above where we added these two items to the self.data list
 
         # load image
-        image_path = os.path.join(self.data_root, 'PrototypeImages_new', image_name)
+        image_path = os.path.join(self.data_root, 'PrototypeImages', image_name)
         img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
 
         # transform: see lines 31ff above where we define our transformations
