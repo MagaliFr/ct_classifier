@@ -8,7 +8,7 @@ device: cuda
 num_workers: 4
 
 # dataset parameters
-data_root: /home/magali/ct_classifier
+data_root: /home/magali/CV4Ecology-summer-school
 num_classes: 2
 
 # training hyperparameters
