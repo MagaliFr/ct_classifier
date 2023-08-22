@@ -5,6 +5,9 @@
     2022 Benjamin Kellenberger
 '''
 
+from comet_ml import Experiment
+from comet_ml.integration.pytorch import log_model
+
 import os
 import argparse
 import yaml
@@ -222,6 +225,12 @@ def validate(cfg, dataLoader, model):
 
 
 def main():
+
+    experiment = Experiment(
+        api_key="3ZDO6GRoHy04w0zznRV16XmW2",
+        project_name="general",
+        workspace="magalifr"
+        )
 
     # Argument parser for command-line arguments:
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
