@@ -6,13 +6,23 @@
 '''
 
 from comet_ml import Experiment
-from comet_ml.integration.pytorch import log_model
+from comet_ml.integration.pytorch import log_model 
+#from comet_ml.integration.pytorch import log_image
+from PIL import Image, ImageDraw, ImageFont
 
 import os
 import argparse
 import yaml
 import glob
 from tqdm import trange
+import matplotlib
+import numpy as np
+import matplotlib.pyplot as plt
+import json
+from torchvision import transforms
+import torchvision.datasets as datasets
+
+#from sklearn.metrics import confusion_matrix
 
 import torch
 import torch.nn as nn
@@ -24,6 +34,64 @@ from util import init_seed
 from dataset import CTDataset
 from model import CustomResNet18
 
+experiment = Experiment(
+    api_key="3ZDO6GRoHy04w0zznRV16XmW2",
+    project_name="general",
+    workspace="magalifr"
+    )
+
+
+def log_images_from_coco_json(json_path, folder_prefix, num_images_to_log=10):
+    with open(json_path, "r") as f:
+        coco_data = json.load(f)
+
+    image_paths = [item["file_name"] for item in coco_data["images"]]
+    
+    for path in image_paths[:num_images_to_log]:
+        experiment.log_image(path, name=f"{folder_prefix}/{path.split('/')[-1]}")
+
+
+def overlay_labels_on_image(image_path, ground_truth, prediction):
+    # Open an image file
+    image = Image.open(image_path)
+    # Prepare to draw on the image
+    draw = ImageDraw.Draw(image)
+
+    # Specify font size and color
+    font = ImageFont.load_default() 
+    #font = ImageFont.truetype("Ubuntu-R.ttf", size=25)  # you might need a different font file
+    color = "red"
+    
+    # Draw ground truth and prediction on the image
+    draw.text((10, 10), f"Ground Truth: {ground_truth}", fill=color, font=font)
+    draw.text((10, 40), f"Prediction: {prediction}", fill=color, font=font)
+
+    # Save the modified image or return it
+    # image.save("output_path.jpg")  # if you want to save
+    return image
+
+
+def draw_label_on_image(image, label, position=(10, 10)):
+    """
+    Draw a label on an image using PIL.
+
+    image: PIL Image object.
+    label: Text to display on the image.
+    position: Tuple indicating where to start the text.
+
+    Returns a new image with the label.
+    """
+    # If the image is not a PIL Image, convert it
+    if not isinstance(image, Image.Image):
+        image = transforms.ToPILImage()(image)
+
+    draw = ImageDraw.Draw(image)
+    
+    # Use a basic font. For custom fonts, you might need to use ImageFont.truetype
+    font = ImageFont.load_default()
+
+    draw.text(position, label, (255, 255, 255), font=font)
+    return image
 
 
 def create_dataloader(cfg, split='train'):
@@ -104,6 +172,7 @@ def train(cfg, dataLoader, model, optimizer):
     '''
         Our actual training function.
     '''
+    #dataset_instance = CTDataset(cfg, split) 
 
     device = cfg['device']
 
@@ -123,6 +192,8 @@ def train(cfg, dataLoader, model, optimizer):
 
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
+    logging_interval = 10  # Log every 10 batches, adjust this value as per your needs
+    num_images_to_log = 29
     for idx, (data, labels) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
 
         # put data and labels on device
@@ -130,6 +201,10 @@ def train(cfg, dataLoader, model, optimizer):
 
         # forward pass
         prediction = model(data)
+
+    #    for j, image_path in enumerate():  
+    #        modified_image = overlay_labels_on_image(image_path, labels[j], prediction[j])
+    #        experiment.log_image(modified_image, name=f"batch_{i}_img_{j}.jpg")
 
         # reset gradients to zero
         optimizer.zero_grad()
@@ -154,17 +229,48 @@ def train(cfg, dataLoader, model, optimizer):
             '[Train] Loss: {:.2f}; OA: {:.2f}%'.format(
                 loss_total/(idx+1),
                 100*oa_total/(idx+1)
-            )
+           )
         )
         progressBar.update(1)
+
+        for i in range(min(data.size(0), num_images_to_log)):  # log a few images from the batch
+            image = data[i].permute(1, 2, 0).cpu().numpy()  # permute and convert to numpy
+            labels = labels[i].item()
+            pred_label = pred_label[i].argmax(dim=0).item()  # get the predicted class
+
+            # Log the image with label and prediction to Comet.ml here
+            #...
+            # For the purpose of visualization, take the first image from the batch
+            image = data[0]
+            ground_truth_label = labels[0].item()
+
+            # Get the model's prediction. This is just a basic example, adapt it to your case.
+            prediction = model(data).argmax(dim=1)[0].item()
+
+            labeled_image = draw_label_on_image(image, f"GT: {ground_truth_label} | Pred: {prediction}")
     
+            # Log the image with labels to Comet ML
+            experiment.log_image(labeled_image, name=f"batch_{idx}_image_0.jpg")
+
+    # You might not want to log every image in every batch, so consider adding a condition to log periodically
+        if idx % logging_interval == 0:
+            break
+
+            # If you want to log images, predictions, or overlay ground truth on images:
+        #for j, image_path in enumerate(image_paths):
+        # Logic for processing each image in the batch using image_path
+        # For example, overlay and log images with predictions:
+        #    overlayed_image = overlay_labels_on_image(image_path, labels[j], prediction[j])
+        #    experiment.log_image(overlayed_image, name=f"batch_{idx}_img_{j}.jpg")
+
+    log_images_from_coco_json("/home/magali/CV4Ecology-summer-school/FinalDataset/SubsetAgeModelCocoTrain_croppedID.json", "training")
+
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           # shorthand notation for: loss_total = loss_total / len(dataLoader)
     oa_total /= len(dataLoader)
 
     return loss_total, oa_total
-
 
 
 def validate(cfg, dataLoader, model):
@@ -215,22 +321,21 @@ def validate(cfg, dataLoader, model):
             )
             progressBar.update(1)
     
+    log_images_from_coco_json("/home/magali/CV4Ecology-summer-school/FinalDataset/SubsetAgeModelCocoVal_croppedID.json", "validation")
+
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)
     oa_total /= len(dataLoader)
+
+    experiment.log_metric("loss val", loss_total)
+    experiment.log_metric("acc val", oa_total)
 
     return loss_total, oa_total
 
 
 
 def main():
-
-    experiment = Experiment(
-        api_key="3ZDO6GRoHy04w0zznRV16XmW2",
-        project_name="general",
-        workspace="magalifr"
-        )
 
     # Argument parser for command-line arguments:
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
@@ -277,14 +382,28 @@ def main():
             'oa_train': oa_train,
             'oa_val': oa_val
         }
+
+        experiment.log_metrics(stats)
+        #log_metrics(dic, prefix=None, step=None, epoch=None)
+
         save_model(cfg, current_epoch, model, stats)
     
 
     # That's all, folks!
         
-
-
 if __name__ == '__main__':
     # This block only gets executed if you call the "train.py" script directly
     # (i.e., "python ct_classifier/train.py").
+    # Paths to your COCO JSON files
+    #training_json_path = "/FinalDataset/SubsetAgeModelCocoTrain_croppedID.json" #path_to_training_coco.json
+    #validation_json_path = "/FinalDataset/SubsetAgeModelCocoVal_croppedID.json" #path_to_validation_coco.json
+    #testing_json_path = "/FinalDataset/SubsetAgeModelCocoTest_croppedID.json" #path_to_testing_coco.json
+
+    # Initialize your Comet.ml experiment
+    # experiment = Experiment(api_key="your_api_key", project_name="general", workspace="your_workspace")
+
+    # Call your functions with the desired paths
+    #train(training_json_path)
+    #val(validation_json_path)
+    #test(testing_json_path)
     main()
