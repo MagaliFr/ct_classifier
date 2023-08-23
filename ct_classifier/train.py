@@ -22,6 +22,7 @@ import json
 from torchvision import transforms
 import torchvision.datasets as datasets
 from sklearn.metrics import precision_recall_curve
+import torch.softmax as softmax
 #from sklearn.metrics import confusion_matrix
 
 import torch
@@ -199,7 +200,7 @@ def train(cfg, dataLoader, model, optimizer):
     progressBar = trange(len(dataLoader))
     #logging_interval = 10  # Log every 10 batches, adjust this value as per your needs
     #num_images_to_log = 29
-    for idx, (data, labels) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
+    for idx, (data, labels, img_path) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
 
         # put data and labels on device
         data, labels = data.to(device), labels.to(device)
@@ -224,9 +225,13 @@ def train(cfg, dataLoader, model, optimizer):
         optimizer.step()
 
         # log statistics
+        #print(prediction, labels)
+        #loss = torch.clamp(loss, min=0, max=10)
+        #print(loss)
         loss_total += loss.item()                       # the .item() command retrieves the value of a single-valued tensor, regardless of its data type and device of tensor
 
-        pred_label = torch.argmax(prediction, dim=1)    # the predicted label is the one at position (class index) with highest predicted value
+        prediction_softmax = softmax(prediction)
+        pred_label = torch.argmax(prediction_softmax, dim=1)    # the predicted label is the one at position (class index) with highest predicted value
         oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
         oa_total += oa.item()
 
@@ -305,7 +310,7 @@ def validate(cfg, dataLoader, model):
     all_pred_labels = []
 
     with torch.no_grad():               # don't calculate intermediate gradient steps: we don't need them, so this saves memory and is faster
-        for idx, (data, labels) in enumerate(dataLoader):
+        for idx, (data, labels, img_path) in enumerate(dataLoader):
             
             all_labels = all_labels + labels.tolist()
 
@@ -321,7 +326,8 @@ def validate(cfg, dataLoader, model):
             # log statistics
             loss_total += loss.item()
 
-            pred_label = torch.argmax(prediction, dim=1)
+            prediction_softmax = softmax(prediction)
+            pred_label = torch.argmax(prediction_softmax, dim=1)
             oa = torch.mean((pred_label == labels).float())
             oa_total += oa.item()
 
@@ -344,16 +350,18 @@ def validate(cfg, dataLoader, model):
     loss_total /= len(dataLoader)
     oa_total /= len(dataLoader)
 
-    experiment.log_metric("loss val", loss_total)
+    #experiment.log_metric("loss val", loss_total)
     experiment.log_metric("acc val", oa_total)
 
     # confusion matrix
     #experiment.create_confusion_matrix(y_true=labels, y_predicted=pred_label)
-    print('all_labels',len(all_labels), 'all_pred', len(all_pred_labels))
     experiment.log_confusion_matrix(y_true=all_labels, y_predicted=all_pred_labels)
 
     #precision, recall, thresholds = precision_recall_curve(labels, preds)
     #precision_recall_curve(labels,prediction)
+
+    # print nr of lables and predictions
+    print('all_labels',len(all_labels), 'all_pred', len(all_pred_labels))
 
     return loss_total, oa_total
 
@@ -409,8 +417,6 @@ def main():
 
         experiment.log_metrics(stats)
         #log_metrics(dic, prefix=None, step=None, epoch=None)
-
-
 
         save_model(cfg, current_epoch, model, stats)
     
