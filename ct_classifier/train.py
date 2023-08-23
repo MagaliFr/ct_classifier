@@ -118,15 +118,16 @@ def load_model(cfg):
     model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
 
     # load latest model state
-    model_states = glob.glob('model_states/*.pt')
+    model_states = glob.glob(os.path.join(cfg['save_dir'],'*.pt')) #'model_states/*.pt') #log_images_from_coco_json(os.path.join(cfg['data_root'], json_file_val), "validation")
     if len(model_states):
         # at least one save state found; get latest
-        model_epochs = [int(m.replace('model_states/','').replace('.pt','')) for m in model_states]
+        model_epochs = [int(m.replace(cfg['save_dir'],'').replace('.pt','')) for m in model_states]
         start_epoch = max(model_epochs)
 
         # load state dict and apply weights to model
         print(f'Resuming from epoch {start_epoch}')
-        state = torch.load(open(f'model_states/{start_epoch}.pt', 'rb'), map_location='cpu')
+        state = torch.load(open(os.path.join(cfg['save_dir'], f'{start_epoch}.pt'), 'rb'), map_location='cpu')
+
         model_instance.load_state_dict(state['model'])
 
     else:
@@ -140,16 +141,20 @@ def load_model(cfg):
 
 def save_model(cfg, epoch, model, stats):
     # make sure save directory exists; create if not
-    os.makedirs('model_states', exist_ok=True)
+    os.makedirs(cfg['save_dir'], exist_ok=True)
 
     # get model parameters and add to stats...
     stats['model'] = model.state_dict()
 
     # ...and save
-    torch.save(stats, open(f'model_states/{epoch}.pt', 'wb'))
+    #torch.save(stats, open(os.path.join(cfg['save_dir']),f'{epoch}.pt', 'wb'))
+    torch.save(stats, open(os.path.join(cfg['save_dir'], f'{epoch}.pt'), 'wb'))
+
+    #torch.save(stats, open(os.path.join(dir_path, f'{epoch}.pt'), 'wb'))
+
     
     # also save config file if not present
-    cfpath = 'model_states/config.yaml'
+    cfpath = os.path.join(cfg['save_dir'],'config.yaml')
     if not os.path.exists(cfpath):
         with open(cfpath, 'w') as f:
             yaml.dump(cfg, f)
@@ -263,7 +268,9 @@ def train(cfg, dataLoader, model, optimizer):
         #    overlayed_image = overlay_labels_on_image(image_path, labels[j], prediction[j])
         #    experiment.log_image(overlayed_image, name=f"batch_{idx}_img_{j}.jpg")
 
-    log_images_from_coco_json("/home/magali/CV4Ecology-summer-school/FinalDataset/SubsetAgeModelCocoTrain_croppedID.json", "training")
+    #log_images_from_coco_json("/home/magali/CV4Ecology-summer-school/FinalDataset/SubsetAgeModelCocoTrain_croppedID.json", "training")
+    json_file_train = cfg['json_file_train']
+    log_images_from_coco_json(os.path.join(cfg['data_root'], json_file_train), "training")
 
     # end of epoch; finalize
     progressBar.close()
@@ -328,7 +335,9 @@ def validate(cfg, dataLoader, model):
             )
             progressBar.update(1)
     
-    log_images_from_coco_json("/home/magali/CV4Ecology-summer-school/FinalDataset/SubsetAgeModelCocoVal_croppedID.json", "validation")
+    json_file_val = cfg['json_file_val']
+    log_images_from_coco_json(os.path.join(cfg['data_root'], json_file_val), "validation")
+    #log_images_from_coco_json(os.path.join"/home/magali/CV4Ecology-summer-school/FinalDataset/SubsetAgeModelCocoVal_croppedID.json", "validation")
 
     # end of epoch; finalize
     progressBar.close()
