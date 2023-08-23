@@ -36,11 +36,15 @@ class CTDataset(Dataset):
         # index data into list
         self.data = []
 
+        json_file_train = cfg['json_file_train']
+        json_file_val = cfg['json_file_val']
+
+
         # load annotation file
         annoPath = os.path.join(
             self.data_root,
             #'eccv_18_annotation_files',
-            'FinalDataset/SubsetAgeModelCocoTrain_croppedID.json' if self.split=='train' else 'FinalDataset/SubsetAgeModelCocoVal_croppedID.json'
+            json_file_train if self.split=='train' else json_file_val
         )
         meta = json.load(open(annoPath, 'r'))
 
@@ -61,6 +65,7 @@ class CTDataset(Dataset):
             self.data.append([imgFileName, labelIndex])
             images_covered.add(imgID)       # make sure image is only added once to dataset
     
+        print(split, 'number of images', len(images), 'labels', len(self.data), 'images covered', len(images_covered))
 
     def __len__(self):
         '''

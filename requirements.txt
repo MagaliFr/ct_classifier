@@ -6,3 +6,7 @@ numpy
 torch
 matplotlib
 Pillow
+sklearn
+scikit-learn 
+scipy
+

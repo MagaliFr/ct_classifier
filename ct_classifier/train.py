@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import json
 from torchvision import transforms
 import torchvision.datasets as datasets
-
+from sklearn.metrics import precision_recall_curve
 #from sklearn.metrics import confusion_matrix
 
 import torch
@@ -192,8 +192,8 @@ def train(cfg, dataLoader, model, optimizer):
 
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
-    logging_interval = 10  # Log every 10 batches, adjust this value as per your needs
-    num_images_to_log = 29
+    #logging_interval = 10  # Log every 10 batches, adjust this value as per your needs
+    #num_images_to_log = 29
     for idx, (data, labels) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
 
         # put data and labels on device
@@ -233,28 +233,28 @@ def train(cfg, dataLoader, model, optimizer):
         )
         progressBar.update(1)
 
-        for i in range(min(data.size(0), num_images_to_log)):  # log a few images from the batch
-            image = data[i].permute(1, 2, 0).cpu().numpy()  # permute and convert to numpy
-            labels = labels[i].item()
-            pred_label = pred_label[i].argmax(dim=0).item()  # get the predicted class
+        #for i in range(min(data.size(0), num_images_to_log)):  # log a few images from the batch
+        #    image = data[i].permute(1, 2, 0).cpu().numpy()  # permute and convert to numpy
+        #    labels = labels[i].item()
+        #    pred_label = pred_label[i].argmax(dim=0).item()  # get the predicted class
 
             # Log the image with label and prediction to Comet.ml here
             #...
             # For the purpose of visualization, take the first image from the batch
-            image = data[0]
-            ground_truth_label = labels[0].item()
+        #    image = data[0]
+        #    ground_truth_label = labels[0].item()
 
             # Get the model's prediction. This is just a basic example, adapt it to your case.
-            prediction = model(data).argmax(dim=1)[0].item()
+        #    prediction = model(data).argmax(dim=1)[0].item()
 
-            labeled_image = draw_label_on_image(image, f"GT: {ground_truth_label} | Pred: {prediction}")
+        #    labeled_image = draw_label_on_image(image, f"GT: {ground_truth_label} | Pred: {prediction}")
     
             # Log the image with labels to Comet ML
-            experiment.log_image(labeled_image, name=f"batch_{idx}_image_0.jpg")
+        #    experiment.log_image(labeled_image, name=f"batch_{idx}_image_0.jpg")
 
     # You might not want to log every image in every batch, so consider adding a condition to log periodically
-        if idx % logging_interval == 0:
-            break
+       # if idx % logging_interval == 0:
+       #     break
 
             # If you want to log images, predictions, or overlay ground truth on images:
         #for j, image_path in enumerate(image_paths):
@@ -294,8 +294,13 @@ def validate(cfg, dataLoader, model):
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
     
+    all_labels = []
+    all_pred_labels = []
+
     with torch.no_grad():               # don't calculate intermediate gradient steps: we don't need them, so this saves memory and is faster
         for idx, (data, labels) in enumerate(dataLoader):
+            
+            all_labels = all_labels + labels.tolist()
 
             # put data and labels on device
             data, labels = data.to(device), labels.to(device)
@@ -312,6 +317,8 @@ def validate(cfg, dataLoader, model):
             pred_label = torch.argmax(prediction, dim=1)
             oa = torch.mean((pred_label == labels).float())
             oa_total += oa.item()
+
+            all_pred_labels = all_pred_labels + pred_label.cpu().tolist()
 
             progressBar.set_description(
                 '[Val ] Loss: {:.2f}; OA: {:.2f}%'.format(
@@ -330,6 +337,14 @@ def validate(cfg, dataLoader, model):
 
     experiment.log_metric("loss val", loss_total)
     experiment.log_metric("acc val", oa_total)
+
+    # confusion matrix
+    #experiment.create_confusion_matrix(y_true=labels, y_predicted=pred_label)
+    print('all_labels',len(all_labels), 'all_pred', len(all_pred_labels))
+    experiment.log_confusion_matrix(y_true=all_labels, y_predicted=all_pred_labels)
+
+    #precision, recall, thresholds = precision_recall_curve(labels, preds)
+    #precision_recall_curve(labels,prediction)
 
     return loss_total, oa_total
 
@@ -385,6 +400,8 @@ def main():
 
         experiment.log_metrics(stats)
         #log_metrics(dic, prefix=None, step=None, epoch=None)
+
+
 
         save_model(cfg, current_epoch, model, stats)
     
