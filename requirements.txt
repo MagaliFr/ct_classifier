@@ -9,4 +9,5 @@ Pillow
 sklearn
 scikit-learn 
 scipy
+util
 
