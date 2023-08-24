@@ -36,7 +36,7 @@ from dataset import CTDataset
 from model import CustomResNet18
 
 experiment = Experiment(
-    api_key="3ZDO6GRoHy04w0zznRV16XmW2",
+    api_key="74VvHHBrA7mvKzWBsmvNV1nqf",
     project_name="general",
     workspace="magalifr"
     )
