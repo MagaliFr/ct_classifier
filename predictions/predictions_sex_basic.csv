@@ -1,4 +1,4 @@
-,0,1,2,3
+,Labels,pred_female,pred_male,Image path
 0,1,-0.6807641386985779,-0.15168622136116028,/home/magali/CV4Ecology-summer-school/PrototypeCroppedImages/PrototypeCroppedImages_Sex_Val/1321_cropped.jpg
 1,0,0.8976683020591736,0.2195056676864624,/home/magali/CV4Ecology-summer-school/PrototypeCroppedImages/PrototypeCroppedImages_Sex_Val/288_cropped.jpg
 2,1,0.19892263412475586,0.4422259032726288,/home/magali/CV4Ecology-summer-school/PrototypeCroppedImages/PrototypeCroppedImages_Sex_Val/125_cropped.jpg
