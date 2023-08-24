@@ -22,7 +22,7 @@ import json
 from torchvision import transforms
 import torchvision.datasets as datasets
 from sklearn.metrics import precision_recall_curve
-import torch.softmax as softmax
+from torch import softmax as softmax
 #from sklearn.metrics import confusion_matrix
 
 import torch
@@ -230,8 +230,8 @@ def train(cfg, dataLoader, model, optimizer):
         #print(loss)
         loss_total += loss.item()                       # the .item() command retrieves the value of a single-valued tensor, regardless of its data type and device of tensor
 
-        prediction_softmax = softmax(prediction)
-        pred_label = torch.argmax(prediction_softmax, dim=1)    # the predicted label is the one at position (class index) with highest predicted value
+        #prediction_softmax = softmax(prediction)
+        pred_label = torch.argmax(prediction, dim=1)    # the predicted label is the one at position (class index) with highest predicted value
         oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
         oa_total += oa.item()
 
@@ -326,8 +326,8 @@ def validate(cfg, dataLoader, model):
             # log statistics
             loss_total += loss.item()
 
-            prediction_softmax = softmax(prediction)
-            pred_label = torch.argmax(prediction_softmax, dim=1)
+            #prediction_softmax = softmax(prediction)
+            pred_label = torch.argmax(prediction, dim=1)
             oa = torch.mean((pred_label == labels).float())
             oa_total += oa.item()
 
