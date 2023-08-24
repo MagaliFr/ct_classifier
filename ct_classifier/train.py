@@ -29,6 +29,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import SGD
+from sklearn.metrics import precision_score, recall_score
 
 # let's import our own classes and functions!
 from util import init_seed
@@ -105,7 +106,7 @@ def create_dataloader(cfg, split='train'):
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=cfg['batch_size'],
-            shuffle=True,
+            shuffle=True if split == 'train' else False,
             num_workers=cfg['num_workers']
         )
     return dataLoader
@@ -117,6 +118,7 @@ def load_model(cfg):
         Creates a model instance and loads the latest model state weights.
     '''
     model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
+    overwrite = cfg['overwrite']
 
     # load latest model state
     model_states = glob.glob(os.path.join(cfg['save_dir'],'*.pt')) #'model_states/*.pt') #log_images_from_coco_json(os.path.join(cfg['data_root'], json_file_val), "validation")
@@ -128,7 +130,6 @@ def load_model(cfg):
         # load state dict and apply weights to model
         print(f'Resuming from epoch {start_epoch}')
         state = torch.load(open(os.path.join(cfg['save_dir'], f'{start_epoch}.pt'), 'rb'), map_location='cpu')
-
         model_instance.load_state_dict(state['model'])
 
     else:
@@ -150,9 +151,6 @@ def save_model(cfg, epoch, model, stats):
     # ...and save
     #torch.save(stats, open(os.path.join(cfg['save_dir']),f'{epoch}.pt', 'wb'))
     torch.save(stats, open(os.path.join(cfg['save_dir'], f'{epoch}.pt'), 'wb'))
-
-    #torch.save(stats, open(os.path.join(dir_path, f'{epoch}.pt'), 'wb'))
-
     
     # also save config file if not present
     cfpath = os.path.join(cfg['save_dir'],'config.yaml')
@@ -306,6 +304,9 @@ def validate(cfg, dataLoader, model):
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
     
+    # create empty lists for true and predicted labels
+    true_labels = []
+    pred_labels = []
     all_labels = []
     all_pred_labels = []
 
@@ -316,6 +317,11 @@ def validate(cfg, dataLoader, model):
 
             # put data and labels on device
             data, labels = data.to(device), labels.to(device)
+
+            # add true labels to the true labels list
+            # import pdb; pdb.set_trace() # DEBUGGER
+            labels_np = labels.cpu().detach().numpy()
+            true_labels.extend(labels_np)
 
             # forward pass
             prediction = model(data)
@@ -332,6 +338,10 @@ def validate(cfg, dataLoader, model):
             oa_total += oa.item()
 
             all_pred_labels = all_pred_labels + pred_label.cpu().tolist()
+
+            # add predicted labels to the predicted labels list
+            pred_label_np = pred_label.cpu().detach().numpy()
+            pred_labels.extend(pred_label_np)
 
             progressBar.set_description(
                 '[Val ] Loss: {:.2f}; OA: {:.2f}%'.format(
@@ -350,8 +360,12 @@ def validate(cfg, dataLoader, model):
     loss_total /= len(dataLoader)
     oa_total /= len(dataLoader)
 
+    # calculate precision and recall
+    precision = precision_score(true_labels, pred_labels)
+    recall = recall_score(true_labels, pred_labels)
+
     #experiment.log_metric("loss val", loss_total)
-    experiment.log_metric("acc val", oa_total)
+    #experiment.log_metric("acc val", oa_total)
 
     # confusion matrix
     #experiment.create_confusion_matrix(y_true=labels, y_predicted=pred_label)
@@ -363,7 +377,7 @@ def validate(cfg, dataLoader, model):
     # print nr of lables and predictions
     print('all_labels',len(all_labels), 'all_pred', len(all_pred_labels))
 
-    return loss_total, oa_total
+    return loss_total, oa_total, precision, recall
 
 
 
@@ -405,21 +419,22 @@ def main():
         print(f'Epoch {current_epoch}/{numEpochs}')
 
         loss_train, oa_train = train(cfg, dl_train, model, optim)
-        loss_val, oa_val = validate(cfg, dl_val, model)
+        loss_val, oa_val, precision, recall = validate(cfg, dl_val, model)
 
         # combine stats and save
         stats = {
             'loss_train': loss_train,
             'loss_val': loss_val,
             'oa_train': oa_train,
-            'oa_val': oa_val
+            'oa_val': oa_val,
+            'precision' : precision,
+            'recall' : recall
         }
 
-        experiment.log_metrics(stats)
+        experiment.log_metrics(stats, epoch = current_epoch)
         #log_metrics(dic, prefix=None, step=None, epoch=None)
 
-        save_model(cfg, current_epoch, model, stats)
-    
+        save_model(cfg, current_epoch, model, stats)    
 
     # That's all, folks!
         
