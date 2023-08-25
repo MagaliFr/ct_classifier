@@ -3,12 +3,11 @@
     values, true values, and filepaths of images as .json.
 
 '''
-
 import os
 import argparse
 import yaml
 import glob
-from tqdm import trange
+#from tqdm import trange
 import json
 import torch
 import torch.nn as nn
@@ -89,7 +88,7 @@ def main():
     # Argument parser for command-line arguments:
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
     parser = argparse.ArgumentParser(description='Test deep learning model.')
-    parser.add_argument('--config', help='Path to config file', default='configs/exp_resnet18.yaml')
+    parser.add_argument('--config', help='Path to config file', default='')
     parser.add_argument('--model_path', help='Path to model .pt file', default='')
     parser.add_argument('--save_json_path', help='Path to .json output', default='')
     args = parser.parse_args()
