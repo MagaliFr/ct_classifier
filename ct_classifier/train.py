@@ -42,6 +42,11 @@ experiment = Experiment(
     workspace="magalifr"
     )
 
+# for logging best model through epochs
+def save_model(model, filename):
+    torch.save(model.state_dict(), filename)
+
+
 
 def log_images_from_coco_json(json_path, folder_prefix, num_images_to_log=10):
     with open(json_path, "r") as f:
@@ -421,6 +426,14 @@ def main():
         loss_train, oa_train = train(cfg, dl_train, model, optim)
         loss_val, oa_val, precision, recall = validate(cfg, dl_val, model)
 
+        # save best model
+        best_acc = 0.0
+        best_epoch = -1
+        if oa_val > best_acc:
+            best_acc = oa_val
+            best_epoch = current_epoch
+        
+
         # combine stats and save
         stats = {
             'loss_train': loss_train,
@@ -434,7 +447,9 @@ def main():
         experiment.log_metrics(stats, epoch = current_epoch)
         #log_metrics(dic, prefix=None, step=None, epoch=None)
 
-        save_model(cfg, current_epoch, model, stats)    
+        save_model(cfg, current_epoch, model, stats)  
+
+    save_model(model, "best_model.pt")  
 
     # That's all, folks!
         
