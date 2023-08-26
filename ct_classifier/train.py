@@ -43,7 +43,7 @@ experiment = Experiment(
     )
 
 # for logging best model through epochs
-def save_model(model, filename):
+def save_best_model(model, filename):
     torch.save(model.state_dict(), filename)
 
 
@@ -432,7 +432,7 @@ def main():
         if oa_val > best_acc:
             best_acc = oa_val
             best_epoch = current_epoch
-        
+            save_best_model(model, "best_model.pt")
 
         # combine stats and save
         stats = {
@@ -441,15 +441,19 @@ def main():
             'oa_train': oa_train,
             'oa_val': oa_val,
             'precision' : precision,
-            'recall' : recall
+            'recall' : recall   
         }
 
         experiment.log_metrics(stats, epoch = current_epoch)
         #log_metrics(dic, prefix=None, step=None, epoch=None)
+    
+        save_model(cfg, current_epoch, model, stats) 
 
-        save_model(cfg, current_epoch, model, stats)  
+    
+    print(f"The best model is from epoch {best_epoch} with accuracy {best_acc:.2f}%")
 
-    save_model(model, "best_model.pt")  
+
+         
 
     # That's all, folks!
         
