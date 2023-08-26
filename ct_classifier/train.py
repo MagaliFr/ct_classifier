@@ -417,6 +417,9 @@ def main():
     # set up model optimizer
     optim = setup_optimizer(cfg, model)
 
+    best_acc = 0.0
+    best_epoch = -1
+
     # we have everything now: data loaders, model, optimizer; let's do the epochs!
     numEpochs = cfg['num_epochs']
     while current_epoch < numEpochs:
@@ -427,8 +430,7 @@ def main():
         loss_val, oa_val, precision, recall = validate(cfg, dl_val, model)
 
         # save best model
-        best_acc = 0.0
-        best_epoch = -1
+
         if oa_val > best_acc:
             best_acc = oa_val
             best_epoch = current_epoch
@@ -440,7 +442,7 @@ def main():
             'loss_val': loss_val,
             'oa_train': oa_train,
             'oa_val': oa_val,
-            'precision' : precision,
+            'precision': precision,
             'recall' : recall   
         }
 
@@ -450,7 +452,7 @@ def main():
         save_model(cfg, current_epoch, model, stats) 
 
     
-    print(f"The best model is from epoch {best_epoch} with accuracy {best_acc:.2f}%")
+        print(f"The best model is from epoch {best_epoch} with accuracy {best_acc:.2f}%")
 
 
          
