@@ -430,7 +430,6 @@ def main():
         loss_val, oa_val, precision, recall = validate(cfg, dl_val, model)
 
         # save best model
-
         if oa_val > best_acc:
             best_acc = oa_val
             best_epoch = current_epoch
@@ -452,7 +451,8 @@ def main():
         save_model(cfg, current_epoch, model, stats) 
 
     
-        print(f"The best model is from epoch {best_epoch} with accuracy {best_acc:.2f}%")
+        
+    print(f"The best model is from epoch {best_epoch} with accuracy {best_acc:.2f}%")
 
 
          
