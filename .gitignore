@@ -6,6 +6,7 @@ model_states
 best_models
 model_states_sexWithoutDama
 model_states_ageDownsampled
+model_states_AllSpp
 
 __pycache__
 *.pyc
