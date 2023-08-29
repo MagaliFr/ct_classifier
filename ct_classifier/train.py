@@ -418,7 +418,16 @@ def main():
     optim = setup_optimizer(cfg, model)
 
     best_acc = 0.0
+    best_score = -1.0  # Initializing best_score
     best_epoch = -1
+    # Assuming you have both `oa_val` and `val_loss` for each epoch
+    # Define constants for normalization (based on the expected ranges of your data)
+    MAX_LOSS = 10.0   # adjust based on your dataset and model, make it the maximum expected loss
+    MAX_ACCURACY = 1.0  # typically it's 1.0 as accuracy lies between 0 and 1
+
+    # Define weights for each metric (should sum to 1.0)
+    LOSS_WEIGHT = 0.5
+    ACCURACY_WEIGHT = 1 - LOSS_WEIGHT
 
     # we have everything now: data loaders, model, optimizer; let's do the epochs!
     numEpochs = cfg['num_epochs']
@@ -429,9 +438,23 @@ def main():
         loss_train, oa_train = train(cfg, dl_train, model, optim)
         loss_val, oa_val, precision, recall = validate(cfg, dl_val, model)
 
+        # Calculate normalized metrics
+        normalized_loss = (MAX_LOSS - loss_val) / MAX_LOSS
+        normalized_accuracy = oa_val / MAX_ACCURACY
+
+        # Calculate combined score
+        combined_score = normalized_loss * LOSS_WEIGHT + normalized_accuracy * ACCURACY_WEIGHT
+
         # save best model
-        if oa_val > best_acc:
-            best_acc = oa_val
+        #if oa_val > best_acc:
+        #    best_acc = oa_val
+        #    best_epoch = current_epoch
+        #    save_best_model(model, "best_model.pt")
+
+        # Save best model based on combined score
+        if combined_score > best_score:
+            best_score = combined_score
+            #best_acc = oa_val  # Update the best accuracy here
             best_epoch = current_epoch
             save_best_model(model, "best_model.pt")
 
