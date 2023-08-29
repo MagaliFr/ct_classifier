@@ -3,6 +3,7 @@ model_states_sex
 model_states_sexBasic
 model_states_age
 model_states
+best_models
 
 __pycache__
 *.pyc
