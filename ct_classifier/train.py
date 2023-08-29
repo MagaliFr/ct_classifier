@@ -387,7 +387,7 @@ def validate(cfg, dataLoader, model):
 
 
 def main():
-
+    
     # Argument parser for command-line arguments:
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
     parser = argparse.ArgumentParser(description='Train deep learning model.')
