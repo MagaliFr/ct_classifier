@@ -5,6 +5,7 @@ model_states_age
 model_states
 best_models
 model_states_sexWithoutDama
+model_states_ageDownsampled
 
 __pycache__
 *.pyc
