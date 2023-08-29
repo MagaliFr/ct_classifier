@@ -22,6 +22,7 @@ import json
 from torchvision import transforms
 import torchvision.datasets as datasets
 from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import average_precision_score
 from torch import softmax as softmax
 #from sklearn.metrics import confusion_matrix
 
@@ -368,6 +369,7 @@ def validate(cfg, dataLoader, model):
     # calculate precision and recall
     precision = precision_score(true_labels, pred_labels)
     recall = recall_score(true_labels, pred_labels)
+    average_precision = average_precision_score(true_labels, pred_labels)
 
     #experiment.log_metric("loss val", loss_total)
     #experiment.log_metric("acc val", oa_total)
@@ -382,7 +384,7 @@ def validate(cfg, dataLoader, model):
     # print nr of lables and predictions
     print('all_labels',len(all_labels), 'all_pred', len(all_pred_labels))
 
-    return loss_total, oa_total, precision, recall
+    return loss_total, oa_total, precision, recall, average_precision
 
 
 
@@ -436,7 +438,7 @@ def main():
         print(f'Epoch {current_epoch}/{numEpochs}')
 
         loss_train, oa_train = train(cfg, dl_train, model, optim)
-        loss_val, oa_val, precision, recall = validate(cfg, dl_val, model)
+        loss_val, oa_val, precision, recall, average_precision = validate(cfg, dl_val, model)
 
         # Calculate normalized metrics
         normalized_loss = (MAX_LOSS - loss_val) / MAX_LOSS
@@ -465,7 +467,8 @@ def main():
             'oa_train': oa_train,
             'oa_val': oa_val,
             'precision': precision,
-            'recall' : recall   
+            'recall' : recall,
+            'average precision': average_precision   
         }
 
         experiment.log_metrics(stats, epoch = current_epoch)
@@ -475,7 +478,7 @@ def main():
 
     
         
-    print(f"The best model is from epoch {best_epoch} with accuracy {best_acc:.2f}%")
+    print(f"The best model is from epoch {best_epoch} with combined score {best_score:.2f}%")
 
 
          
