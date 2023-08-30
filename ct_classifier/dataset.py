@@ -17,6 +17,9 @@ import json
 from torch.utils.data import Dataset
 from torchvision.transforms import Compose, Resize, ToTensor
 from PIL import Image
+from PIL import Image
+import torchvision.transforms as T
+import matplotlib.pyplot as plt
 
 
 class CTDataset(Dataset):
@@ -32,6 +35,9 @@ class CTDataset(Dataset):
             Resize((cfg['image_size'])),        # For now, we just resize the images to the same dimensions...
             ToTensor()                          # ...and convert them to torch.Tensor.
         ])
+
+        # save image size from cfg
+        self.image_size = cfg['image_size']
         
         # index data into list
         self.data = []
@@ -67,6 +73,7 @@ class CTDataset(Dataset):
     
         print(split, 'number of images', len(images), 'labels', len(self.data), 'images covered', len(images_covered))
 
+
     def __len__(self):
         '''
             Returns the length of the dataset.
@@ -85,7 +92,22 @@ class CTDataset(Dataset):
         image_path = image_name# os.path.join(self.data_root, 'PrototypeCroppedImages/PrototypeCroppedImages_Age_Test', image_name)
         img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
 
+        # calculate padding for current image
+        w, h = img.size
+        img_max_dim = max(w, h) # which size is longer?
+        pad_amount_x = int((img_max_dim - w) / 2)
+        pad_amount_y = int((img_max_dim - h) / 2)
+        transform_pad_resize = Compose([
+            T.Pad([pad_amount_x, pad_amount_y]), # pad first
+            Resize(self.image_size), # then resize
+            ToTensor()
+        ])
+
+        # Apply the transformation with padding
+        img_tensor = transform_pad_resize(img)
+
+
         # transform: see lines 31ff above where we define our transformations
-        img_tensor = self.transform(img)
+        # img_tensor = self.transform(img)
 
         return img_tensor, label, image_path

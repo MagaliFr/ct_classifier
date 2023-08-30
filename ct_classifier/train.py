@@ -25,6 +25,7 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import average_precision_score
 from torch import softmax as softmax
 #from sklearn.metrics import confusion_matrix
+import torchvision.transforms as T
 
 import torch
 import torch.nn as nn
