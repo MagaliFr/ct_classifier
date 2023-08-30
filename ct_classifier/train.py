@@ -28,7 +28,6 @@ from torch import softmax as softmax
 import torchvision.transforms as T
 import argparse
 
-
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -37,7 +36,7 @@ from sklearn.metrics import precision_score, recall_score
 
 # let's import our own classes and functions!
 from util import init_seed
-from ct_classifier.dataset_old import CTDataset
+from dataset import CTDataset
 from model import CustomResNet18
 
 experiment = Experiment(
