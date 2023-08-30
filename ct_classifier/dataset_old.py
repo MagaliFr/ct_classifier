@@ -22,6 +22,7 @@ import torchvision.transforms as T
 import matplotlib.pyplot as plt
 
 
+
 class CTDataset(Dataset):
 
     def __init__(self, cfg, split='train'):
@@ -80,7 +81,47 @@ class CTDataset(Dataset):
         '''
         return len(self.data)
 
+    #def _get_transform_pad_resize(target_size):
+    #    ''' Returns a transform to pad and resize the image to the target size. '''
+    #    return T.Compose([
+    #        CTDataset._calculate_padding,  # Pad first
+    #        T.Resize(target_size),  # Then resize
+    #        T.ToTensor()
+    #    ])
     
+    #def _get_transform_pad_resize(target_size):
+    #    ''' Returns a transform to pad and resize the image to the target size. '''
+    #    return T.Compose([
+    #    T.Lambda(lambda img: img.pad(CTDataset._calculate_padding(img))),  # Use a lambda to apply the padding
+    #    T.Resize(target_size),
+    #    T.ToTensor()
+    #    ])
+
+    #def _get_transform_pad_resize(target_size):
+    #    ''' Returns a transform to pad and resize the image to the target size. '''
+    #    return T.Compose([
+    #    T.Pad(CTDataset._calculate_padding),  # Use Pad directly
+    #    T.Resize(target_size),
+    #    T.ToTensor()
+    #    ])
+
+    #def _calculate_padding(img):
+    #    w, h = img.size
+    #    img_max_dim = max(w, h)  # Which size is longer?
+    #    pad_amount_x = int((img_max_dim - w) / 2)
+    #    pad_amount_y = int((img_max_dim - h) / 2)
+    #    return (pad_amount_x, pad_amount_y, pad_amount_x, pad_amount_y)  # Returns a 4-tuple (left, top, right, bottom)
+
+
+
+    #def _calculate_padding(img):
+    #    w, h = img.size
+    #   img_max_dim = max(w, h)  # Which size is longer?
+    #    pad_amount_x = int((img_max_dim - w) / 2)
+    #    pad_amount_y = int((img_max_dim - h) / 2)
+    #    return [pad_amount_x, pad_amount_y]
+    
+
     def __getitem__(self, idx):
         '''
             Returns a single data point at given idx.
@@ -93,21 +134,62 @@ class CTDataset(Dataset):
         img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
 
         # calculate padding for current image
+        #w, h = img.size
+        #img_max_dim = max(w, h) # which size is longer?
+        #pad_amount_x = int((img_max_dim - w) / 2)
+        #pad_amount_y = int((img_max_dim - h) / 2)
+        #transform_pad_resize = T.Compose([
+        #    T.Pad([pad_amount_x, pad_amount_y]), # pad first
+        #    T.Resize(self.image_size), # then resize
+        #    T.ToTensor()
+        #])
+        #img = Image.open(image_path).convert('RGB')
+        #img = transform_and_pad(img, self.image_size)
+        #img = Image.open(image_path).convert('RGB')
+        #transform_pad_resize = CTDataset._get_transform_pad_resize(self.image_size)
+        img_tensor = transform_pad_resize(img)
+
+        # Calculate the padding
         w, h = img.size
-        img_max_dim = max(w, h) # which size is longer?
+        img_max_dim = max(w, h)
         pad_amount_x = int((img_max_dim - w) / 2)
         pad_amount_y = int((img_max_dim - h) / 2)
-        transform_pad_resize = T.Compose([
-            T.Pad([pad_amount_x, pad_amount_y]), # pad first
-            T.Resize(self.image_size), # then resize
+
+        # Apply padding
+        img = T.Pad([pad_amount_x, pad_amount_y])(img)
+
+        # Apply the resize and ToTensor transformations
+        img = T.Compose([
+            T.Resize(self.image_size),
             T.ToTensor()
-        ])
+        ])(img)
 
         # Apply the transformation with padding
-        img_tensor = transform_pad_resize(img)
+        #img_tensor = transform_pad_resize(img)
 
 
         # transform: see lines 31ff above where we define our transformations
         # img_tensor = self.transform(img)
 
-        return img_tensor, label, image_path
+        return img_tensor, img, label, image_path
+    
+
+def visualize_one_image(img_path, target_size):
+    img = Image.open(img_path).convert('RGB')
+    
+    # Calculate the padding
+    w, h = img.size
+    img_max_dim = max(w, h)  # Which size is longer?
+    pad_amount_x = int((img_max_dim - w) / 2)
+    pad_amount_y = int((img_max_dim - h) / 2)
+    
+    transform_pad_resize = CTDataset._get_transform_pad_resize(target_size)
+    
+    padded_img = transform_pad_resize(img)
+    
+    # Convert the padded tensor back to an image
+    padded_img_from_tensor = T.ToPILImage()(padded_img.squeeze(0).cpu())
+    plt.imshow(padded_img_from_tensor)
+    plt.title('Padded Image')
+    plt.show()
+

@@ -26,6 +26,8 @@ from sklearn.metrics import average_precision_score
 from torch import softmax as softmax
 #from sklearn.metrics import confusion_matrix
 import torchvision.transforms as T
+import argparse
+
 
 import torch
 import torch.nn as nn
@@ -35,7 +37,7 @@ from sklearn.metrics import precision_score, recall_score
 
 # let's import our own classes and functions!
 from util import init_seed
-from dataset import CTDataset
+from ct_classifier.dataset_old import CTDataset
 from model import CustomResNet18
 
 experiment = Experiment(
@@ -109,6 +111,8 @@ def create_dataloader(cfg, split='train'):
         PyTorch DataLoader object.
     '''
     dataset_instance = CTDataset(cfg, split)        # create an object instance of our CTDataset class
+    #dataset_instance.visualize_one_image(index=0)
+
 
     dataLoader = DataLoader(
             dataset=dataset_instance,
@@ -461,7 +465,7 @@ def main():
             best_epoch = current_epoch
             save_best_model(model, "best_model.pt")
 
-        # combine stats and save
+        # combine stats and 
         stats = {
             'loss_train': loss_train,
             'loss_val': loss_val,
@@ -487,6 +491,22 @@ def main():
     # That's all, folks!
         
 if __name__ == '__main__':
+    #sample_image_path = '/home/magali/CV4Ecology-summer-school/PrototypeCroppedImages/PrototypeCroppedImages_Sex_Val/87_cropped.jpg'  # Change to a sample image path from your dataset PrototypeCroppedImages/PrototypeCroppedImages_Sex_Val/87_cropped.jpg
+    #sample_image_size = 224  # Or whatever your target size is
+    #visualize_one_image(sample_image_path, sample_image_size)
+
+    #parser = argparse.ArgumentParser(description='Training or Visualization Script')
+    #parser.add_argument('--visualize-padding', action='store_true',
+    #                    help='Display a sample image after applying padding')
+    #args = parser.parse_args()
+   
+    #if args.visualize_padding:
+    #    sample_image_path = '/path/to/sample/image.jpg'  # Change to a sample image path from your dataset
+    #    sample_image_size = 224  # Or whatever your target size is
+    #    visualize_one_image(sample_image_path, sample_image_size)
+    #else:
+        # Your normal training code here...
+
     # This block only gets executed if you call the "train.py" script directly
     # (i.e., "python ct_classifier/train.py").
     # Paths to your COCO JSON files
