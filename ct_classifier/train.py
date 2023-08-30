@@ -374,6 +374,8 @@ def validate(cfg, dataLoader, model):
     precision = precision_score(true_labels, pred_labels)
     recall = recall_score(true_labels, pred_labels)
     average_precision = average_precision_score(true_labels, pred_labels)
+    prec_recall_curve = precision_recall_curve(true_labels, pred_labels)
+
 
     #experiment.log_metric("loss val", loss_total)
     #experiment.log_metric("acc val", oa_total)
@@ -388,7 +390,7 @@ def validate(cfg, dataLoader, model):
     # print nr of lables and predictions
     print('all_labels',len(all_labels), 'all_pred', len(all_pred_labels))
 
-    return loss_total, oa_total, precision, recall, average_precision
+    return loss_total, oa_total, precision, recall, average_precision, prec_recall_curve
 
 
 
