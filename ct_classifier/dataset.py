@@ -92,30 +92,30 @@ class CTDataset(Dataset):
         image_path = image_name# os.path.join(self.data_root, 'PrototypeCroppedImages/PrototypeCroppedImages_Age_Test', image_name)
         img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
 
-        # calculate padding for current image & adding augmentations
-        w, h = img.size
-        img_max_dim = max(w, h) # which size is longer?
-        pad_amount_x = int((img_max_dim - w) / 2)
-        pad_amount_y = int((img_max_dim - h) / 2)
-        if self.split == "train":
-            transforms = T.Compose([
-                T.Pad([pad_amount_x, pad_amount_y]), # pad first
-                T.Resize(self.image_size), # then resize
-                T.RandomHorizontalFlip(p=0.5),
-                T.ColorJitter(brightness=.5, hue=.3),
-                T.ToTensor()
-            ])
-        else:
-            transforms = T.Compose([
-                T.Pad([pad_amount_x, pad_amount_y]), # pad first
-                T.Resize(self.image_size), # then resize
-                T.ToTensor()
-            ])
+        # calculate padding for current image & adding augmentations (outcomment if basic model run)
+        #w, h = img.size
+        #img_max_dim = max(w, h) # which size is longer?
+        #pad_amount_x = int((img_max_dim - w) / 2)
+        #pad_amount_y = int((img_max_dim - h) / 2)
+        #if self.split == "train":
+        #    transforms = T.Compose([
+        #        T.Pad([pad_amount_x, pad_amount_y]), # pad first
+        #        T.Resize(self.image_size), # then resize
+        #        T.RandomHorizontalFlip(p=0.5),
+        #        T.ColorJitter(brightness=.5, hue=.3),
+        #        T.ToTensor()
+        #    ])
+        #else:
+        #    transforms = T.Compose([
+        #        T.Pad([pad_amount_x, pad_amount_y]), # pad first
+        #        T.Resize(self.image_size), # then resize
+        #        T.ToTensor()
+        #    ])
         # Apply the transformation with padding
-        img_tensor = transforms(img)
+        #img_tensor = transforms(img)
 
 
         # transform: see lines 31ff above where we define our transformations
-        # img_tensor = self.transform(img) #activate this if only resize without padding
+        img_tensor = self.transform(img) #activate this if only resize without padding
 
         return img_tensor, label, image_path
