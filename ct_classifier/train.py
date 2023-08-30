@@ -444,7 +444,7 @@ def main():
         print(f'Epoch {current_epoch}/{numEpochs}')
 
         loss_train, oa_train = train(cfg, dl_train, model, optim)
-        loss_val, oa_val, precision, recall, average_precision = validate(cfg, dl_val, model)
+        loss_val, oa_val, precision, recall, average_precision, prec_recall_curve = validate(cfg, dl_val, model)
 
         # Calculate normalized metrics
         normalized_loss = (MAX_LOSS - loss_val) / MAX_LOSS
@@ -474,7 +474,8 @@ def main():
             'oa_val': oa_val,
             'precision': precision,
             'recall' : recall,
-            'average precision': average_precision   
+            'average precision': average_precision,
+            'precision recall curve' : prec_recall_curve
         }
 
         experiment.log_metrics(stats, epoch = current_epoch)
