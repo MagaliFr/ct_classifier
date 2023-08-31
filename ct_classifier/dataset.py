@@ -44,13 +44,20 @@ class CTDataset(Dataset):
 
         json_file_train = cfg['json_file_train']
         json_file_val = cfg['json_file_val']
+        json_file_test = cfg['json_file_test']
 
+        if self.split == "train":
+            json_file = json_file_train
+        elif self.split == "val":
+            json_file = json_file_val
+        elif self.split == "test":
+            json_file = json_file_test
 
         # load annotation file
         annoPath = os.path.join(
             self.data_root,
             #'eccv_18_annotation_files',
-            json_file_train if self.split=='train' else json_file_val
+            json_file
         )
         meta = json.load(open(annoPath, 'r'))
 

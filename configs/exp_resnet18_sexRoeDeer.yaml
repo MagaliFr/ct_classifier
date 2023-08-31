@@ -3,11 +3,11 @@
 # In Python, this is all read as a dict.
 
 # environment/computational parameters
-#seed: 32678456782        # run 1, random number generator seed (long integer value)
-#seed: 36485918375        # run 2
-#seed: 12345678902         # run 3
-#seed: 83746109374         # run 4
-seed: 10946253911         # run 5
+seed: 19837552478        # run 1, random number generator seed (long integer value)
+#seed: 19888762332         # run 2
+#seed: 99871887355         # run 3
+#seed: 12367498679         # run 4
+#seed: 10922335098         # run 5
 device: cuda
 num_workers: 4
 
@@ -15,8 +15,9 @@ num_workers: 4
 data_root: /home/magali/CV4Ecology-summer-school
 num_classes: 2
 
-json_file_train:  FinalDataset/SubsetSexModelCocoTrain_croppedID.json
-json_file_val: FinalDataset/SubsetSexModelCocoVal_croppedID.json
+json_file_train:  FinalDataset/SubsetSexModelRoeDeerCocoTrain_croppedID.json
+json_file_val: FinalDataset/SubsetSexModelRoeDeerCocoVal_croppedID.json
+json_file_test: FinalDataset/SubsetSexModelRoeDeerCocoTest_croppedID.json
 save_dir: /home/magali/ct_classifier/model_states_sexBasic/
 
 # training hyperparameters
