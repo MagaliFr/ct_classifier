@@ -101,7 +101,7 @@ class CTDataset(Dataset):
             transforms = T.Compose([
                 T.Pad([pad_amount_x, pad_amount_y]), # pad first
                 T.Resize(self.image_size), # then resize
-                #T.RandomHorizontalFlip(p=0.5),
+                T.RandomHorizontalFlip(p=0.5),
                 #T.ColorJitter(brightness=.5, hue=.3),
                 T.ToTensor()
             ])
