@@ -3,8 +3,8 @@
 # In Python, this is all read as a dict.
 
 # environment/computational parameters
-seed: 32678456782        # run 1, random number generator seed (long integer value)
-#seed: 36485918375        # run 2
+#seed: 32678456782        # run 1, random number generator seed (long integer value)
+seed: 36485918375        # run 2
 #seed: 12345678902         # run 3
 #seed: 83746109374         # run 4
 #seed: 10946253911         # run 5

@@ -6,7 +6,8 @@
 #seed: 32678456782       # run 1, random number generator seed (long integer value)
 #seed: 17364917364        # run 2
 #seed: 839466122893       # run 3
-seed: 28739801283       # run 4
+#seed: 28739801283       # run 4
+seed: 29000876529         # run 5
 
 device: cuda
 num_workers: 4
