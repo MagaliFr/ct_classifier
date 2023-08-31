@@ -123,32 +123,68 @@ def create_dataloader(cfg, split='train'):
 
 
 
-def load_model(cfg):
-    '''
-        Creates a model instance and loads the latest model state weights.
-    '''
-    model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
-    overwrite = cfg['overwrite']
+#def load_model(cfg):
+#    '''
+#        Creates a model instance and loads the latest model state weights.
+#    '''
+#    model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
+#    overwrite = cfg['overwrite']
 
     # load latest model state
-    model_states = glob.glob(os.path.join(cfg['save_dir'],'*.pt')) #'model_states/*.pt') #log_images_from_coco_json(os.path.join(cfg['data_root'], json_file_val), "validation")
-    if len(model_states):
-        # at least one save state found; get latest
-        model_epochs = [int(m.replace(cfg['save_dir'],'').replace('.pt','')) for m in model_states]
-        start_epoch = max(model_epochs)
+#    model_states = glob.glob(os.path.join(cfg['save_dir'],'*.pt')) #'model_states/*.pt') #log_images_from_coco_json(os.path.join(cfg['data_root'], json_file_val), "validation")
+#    if len(model_states):
+#        # at least one save state found; get latest
+#        model_epochs = [int(m.replace(cfg['save_dir'],'').replace('.pt','')) for m in model_states]
+#        start_epoch = max(model_epochs)#
+#
+#        # load state dict and apply weights to model
+#        print(f'Resuming from epoch {start_epoch}')
+#        state = torch.load(open(os.path.join(cfg['save_dir'], f'{start_epoch}.pt'), 'rb'), map_location='cpu')
+#        model_instance.load_state_dict(state['model'])
 
-        # load state dict and apply weights to model
-        print(f'Resuming from epoch {start_epoch}')
-        state = torch.load(open(os.path.join(cfg['save_dir'], f'{start_epoch}.pt'), 'rb'), map_location='cpu')
+#    else:
+#        # no save state found; start anew
+#       print('Starting new model')
+#        start_epoch = 0
+
+#    return model_instance, start_epoch
+
+def load_model(cfg, model_path=None):
+    '''
+        Creates a model instance and loads the model state weights.
+        If model_path is specified, loads the model from that path.
+        Otherwise, loads the latest model state from cfg['save_dir'].
+    '''
+    model_instance = CustomResNet18(cfg['num_classes'])  # create an object instance of our CustomResNet18 class
+    overwrite = cfg['overwrite']
+
+    if model_path is not None:
+        # Load model from the specified path
+        print(f'Loading model from {model_path}')
+        state = torch.load(open(model_path, 'rb'), map_location='cpu')
         model_instance.load_state_dict(state['model'])
-
+        # Extract epoch number from model path if needed
+        start_epoch = int(os.path.basename(model_path).replace('.pt', '').split('_')[-1])
+        
     else:
-        # no save state found; start anew
-        print('Starting new model')
-        start_epoch = 0
+        # load latest model state
+        model_states = glob.glob(os.path.join(cfg['save_dir'], '*.pt'))
+        if len(model_states):
+            # at least one save state found; get latest
+            model_epochs = [int(m.replace(cfg['save_dir'], '').replace('.pt', '')) for m in model_states]
+            start_epoch = max(model_epochs)
+
+            # load state dict and apply weights to model
+            print(f'Resuming from epoch {start_epoch}')
+            state = torch.load(open(os.path.join(cfg['save_dir'], f'{start_epoch}.pt'), 'rb'), map_location='cpu')
+            model_instance.load_state_dict(state['model'])
+
+        else:
+            # no save state found; start anew
+            print('Starting new model')
+            start_epoch = 0
 
     return model_instance, start_epoch
-
 
 
 def save_model(cfg, epoch, model, stats):
