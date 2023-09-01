@@ -3,10 +3,10 @@
 # In Python, this is all read as a dict.
 
 # environment/computational parameters
-seed: 19837552478        # run 1, random number generator seed (long integer value)
+#seed: 19837552478        # run 1, random number generator seed (long integer value)
 #seed: 19888762332         # run 2
 #seed: 99871887355         # run 3
-#seed: 12367498679         # run 4
+seed: 12367498679         # run 4
 #seed: 10922335098         # run 5
 device: cuda
 num_workers: 4

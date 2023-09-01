@@ -14,7 +14,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import SGD
 from util import init_seed
-from ct_classifier.dataset_old import CTDataset
+from dataset import CTDataset
 from model import CustomResNet18
 import numpy as np
 from train import create_dataloader

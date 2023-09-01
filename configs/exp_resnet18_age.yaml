@@ -3,7 +3,7 @@
 # In Python, this is all read as a dict.
 
 # environment/computational parameters
-seed: 32678456782       # random number generator seed (long integer value)
+seed: 32678456782       # run 1, random number generator seed (long integer value)
 device: cuda
 num_workers: 4
 
@@ -18,7 +18,7 @@ save_dir: /home/magali/ct_classifier/model_states_age/
 
 # training hyperparameters
 image_size: [224, 224]
-num_epochs: 200
+num_epochs: 100
 batch_size: 128
 learning_rate: 0.001
 weight_decay: 0.001
