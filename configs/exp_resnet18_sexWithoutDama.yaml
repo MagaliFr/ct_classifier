@@ -18,6 +18,7 @@ num_classes: 2
 
 json_file_train:  FinalDataset/SubsetSexWithoutDamaCocoTrain_croppedID.json
 json_file_val: FinalDataset/SubsetSexWithoutDamaCocoVal_croppedID.json
+json_file_test: FinalDataset/SubsetSexWithoutDamaCocoTest_croppedID.json
 save_dir: /home/magali/ct_classifier/model_states_sexWithoutDama/
 
 # training hyperparameters

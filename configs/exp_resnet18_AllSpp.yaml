@@ -13,6 +13,7 @@ num_classes: 2
 
 json_file_train:  FinalDataset/SubsetAllSppCocoTrain_croppedID.json
 json_file_val: FinalDataset/SubsetAllSppCocoVal_croppedID.json
+json_file_test: FinalDataset/SubsetAllSppCocoTest_croppedID.json
 save_dir: /home/magali/ct_classifier/model_states_AllSpp/
 
 # training hyperparameters

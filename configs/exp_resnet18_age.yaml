@@ -13,6 +13,7 @@ num_classes: 2
 
 json_file_train:  FinalDataset/SubsetAgeModelCocoTrain_croppedID.json
 json_file_val: FinalDataset/SubsetAgeModelCocoVal_croppedID.json
+json_file_test: FinalDataset/SubsetAgeModelCocoTest_croppedID.json
 save_dir: /home/magali/ct_classifier/model_states_age/
 
 # training hyperparameters
