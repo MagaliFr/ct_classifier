@@ -7,6 +7,7 @@ best_models
 model_states_sexWithoutDama
 model_states_ageDownsampled
 model_states_AllSpp
+model_states_sexRoeDeer
 
 __pycache__
 *.pyc
