@@ -20,7 +20,7 @@ from PIL import Image
 from PIL import Image
 import torchvision.transforms as T
 import matplotlib.pyplot as plt
-
+from torch import tensor
 
 class CTDataset(Dataset):
 
@@ -110,7 +110,9 @@ class CTDataset(Dataset):
                 T.Resize(self.image_size), # then resize
                 T.RandomHorizontalFlip(p=0.5),
                 T.ColorJitter(brightness=.5, hue=.3),
-                T.ToTensor()
+                T.ToTensor(),
+                T.Normalize(mean=tensor([0.4850, 0.4560, 0.4060]), std=tensor([0.2290, 0.2240, 0.2250])),
+                #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
         else:
             transforms = T.Compose([
