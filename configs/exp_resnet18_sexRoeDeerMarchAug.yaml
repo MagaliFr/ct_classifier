@@ -24,7 +24,7 @@ save_dir: /home/magali/ct_classifier/model_states_sexRoeDeer/
 image_size: [224, 224]
 num_epochs: 100
 batch_size: 128
-learning_rate: 0.001
+learning_rate: 0.0001
 weight_decay: 0.001
 
 # overwrite .pt files?
