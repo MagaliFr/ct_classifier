@@ -108,11 +108,11 @@ class CTDataset(Dataset):
             transforms = T.Compose([
                 T.Pad([pad_amount_x, pad_amount_y]), # pad first
                 T.Resize(self.image_size), # then resize
-                T.GaussianBlur(kernel_size=5, sigma=(0.1, 2.5)),
-                T.RandomPerspective(distortion_scale=0.5, p=0.5),
+                #T.GaussianBlur(kernel_size=5, sigma=(0.1, 2.5)),
                 T.RandomHorizontalFlip(p=0.5),
                 T.ColorJitter(brightness=.5, hue=.3),
-                T.RandomGrayscale(p=.5),
+                T.RandomPerspective(distortion_scale=0.5, p=0.5),
+                #T.RandomGrayscale(p=.5),
                 T.ToTensor(),
                 T.Normalize(mean=tensor([0.4850, 0.4560, 0.4060]), std=tensor([0.2290, 0.2240, 0.2250]))
             ])
