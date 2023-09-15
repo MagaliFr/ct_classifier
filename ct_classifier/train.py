@@ -465,7 +465,7 @@ def validate(cfg, dataLoader, model):
     # print nr of lables and predictions
     print('all_labels',len(all_labels), 'all_pred', len(all_pred_labels))
 
-    return loss_total, oa_total, precision, recall, average_precision
+    return loss_total, oa_total, precision, recall, average_precision, all_labels, all_pred_labels
 
 
 
